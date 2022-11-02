@@ -1,0 +1,41 @@
+{
+    "jupyter.jupyterServerType": "local",
+    "editor.formatOnSave": true,
+    "editor.rulers": [
+        80,
+        120
+    ],
+    "python.testing.unittestArgs": [
+        "-v",
+        "-s",
+        "./tests",
+        "-p",
+        "test_*.py"
+    ],
+    "python.testing.pytestEnabled": false,
+    "python.testing.unittestEnabled": true,
+    "cSpell.words": [
+        "arange",
+        "astype",
+        "ckpt",
+        "cmap",
+        "crossentropy",
+        "cumsum",
+        "imageio",
+        "imagenet",
+        "imread",
+        "imshow",
+        "keras",
+        "ksize",
+        "natsort",
+        "natsorted",
+        "pyenv",
+        "pyplot",
+        "Seaborn",
+        "Tensorflow",
+        "thresholding",
+        "tqdm",
+        "Unet",
+        "virtualenv"
+    ]
+}

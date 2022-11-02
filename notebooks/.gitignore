@@ -1,0 +1,10 @@
+assets/*
+!assets/.gitkeep
+
+data/*
+!data/.gitkeep
+!data/**/*.h5
+
+.comet.config
+
+out/*
