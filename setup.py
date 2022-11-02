@@ -1,5 +1,7 @@
 from setuptools import setup
 
+deps = ['numpy', 'scipy', 'scikit-image', 'imageio', 'natsort', 'tqdm']
+
 setup(
     name='cv_gmm_deep',
     version='0.0.1',
@@ -7,5 +9,6 @@ setup(
     url='git@github.com:mamello-justice/cv_gmm_deep.git',
     author='Mamello Seboholi',
     author_email='j.seboholi@gmail.com',
-    packages=['cv_gmm_deep']
+    packages=['cv_gmm_deep'],
+    install_requires=deps
 )

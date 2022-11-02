@@ -16,11 +16,12 @@
 - [OpenCV](https://opencv.org/) - ImageIO and control for convolution
 - [SciPy](https://scipy.org/) - Creation of multi-variate normal/gaussian distributions
 - [SciKit Image](https://scikit-image.org/) - Image color conversions and thresholding
-- [Tensorflow](https://www.tensorflow.org/) - Deep learning implementation
+- [Tensorflow (Keras)](https://www.tensorflow.org/) - Deep learning implementation
 - [Segmentation Models](https://segmentation-models.readthedocs.io/en/latest/index.html) - UNet implementation with VGG16 weights
 
 ### Getting started
 
 1. Extract puzzle images and masks to [assets](./assets) dir
 2. Install dependencies (ideally in a virtual environment [virtualenv](https://github.com/pypa/virtualenv) or [pyenv](https://github.com/pyenv/pyenv))
-3. Run jupyter notebook/lab
+3. Install package in develop mode `pip install -e .`
+4. Run jupyter notebooks

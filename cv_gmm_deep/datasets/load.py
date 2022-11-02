@@ -21,6 +21,6 @@ def load_data(input_dir, height, width):
             img_as_float32(imageio.imread(path))
             for path in tqdm(data_paths, f'Reading in {prefix}')
         ])
-        data += (raw_data)
+        data += (raw_data,)
 
     return data
