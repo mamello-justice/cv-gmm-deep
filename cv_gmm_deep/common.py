@@ -1,4 +1,5 @@
 import numpy as np
+from tqdm.auto import tqdm
 
 
 def split_data(x, y, ratios):
@@ -33,12 +34,20 @@ def preprocess_data(x, y, features):
 
         temp = []
 
-        for i in range(len(x_new)):
-            G1 = cv2.GaussianBlur(x_new[i], ksize=kernel_shape, sigmaX=sigma)
+        for x_item in tqdm(x_new, 'Adding DoG'):
+            G1 = cv2.GaussianBlur(
+                x_item, ksize=kernel_shape, sigmaX=sigma)
             G2 = cv2.GaussianBlur(
-                x_new[i], ksize=kernel_shape, sigmaX=K**2 * sigma)
+                x_item, ksize=kernel_shape, sigmaX=K**2 * sigma)
             temp.append(G2 - G1)
 
         x_new = np.append(x_new, temp, axis=3)
 
     return x_new, y_new
+
+
+def flat_images(x, y):
+    return (
+        np.reshape(x, (x.shape[0], -1, x.shape[-1])),
+        np.reshape(y, (y.shape[0], -1, y.shape[-1]))
+    )

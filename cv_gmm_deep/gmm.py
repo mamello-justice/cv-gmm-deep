@@ -1,16 +1,19 @@
 import numpy as np
+from tqdm.auto import trange
 from scipy.stats import multivariate_normal
 
 
 class GMM:
-    def __init__(self, K: int, I: int):
+    def __init__(self, K: int, D: int, I: int):
         """Initialize Gaussian mixture model
 
         Args:
             K (int): Number of gaussian models
-            I (int): Number of features
+            D (int): Number of dimensions/features
+            I (int): Number of pixels
         """
         self.K = K
+        self.D = D
         self.I = I
 
         self.compiled = False
@@ -18,12 +21,12 @@ class GMM:
     def compile(self):
         self.lambda_m = np.ones(self.K) / self.K
 
-        self.mu_m = np.random.random((self.K, self.I))
+        self.mu_m = np.random.random((self.K, self.D))
 
-        sigma_m = np.random.random((self.K, self.I, self.I))
+        sigma_m = np.random.random((self.K, self.D, self.D))
         for k in range(self.K):
             sigma_m[k] *= sigma_m[k].T
-            sigma_m[k] += self.I * np.eye(self.I)
+            sigma_m[k] += self.D * np.eye(self.D)
         self.sigma_m = sigma_m
 
         self.compiled = True
@@ -34,29 +37,79 @@ class GMM:
                 "Cannot fit before compiling model. Run model.compile()")
 
     def __call__(self, x):
+        """Predict values usings current weights
+
+        Args:
+            x (I, D): Input data by features/dimensions
+
+        Returns:
+            tuple: (sum, values)
+                sum (I,): summed values along K
+                values (K, I): predicted pixel values by K 
+        """
         self._require_compile()
 
         values = np.empty((0, *x.shape[:-1]))
 
-        for k in range(self.K):
-            y = [self.lambda_m[k] *
-                 multivariate_normal.pdf(x, self.mu_m[k], self.sigma_m[k])]
-            values = np.append(values, y, axis=0)
+        for lambda_, mu, sigma in zip(self.lambda_m, self.mu_m, self.sigma_m):
+            y = lambda_ * multivariate_normal.pdf(x, mu, sigma)
+            values = np.append(values, [y], axis=0)
 
         return np.sum(values, axis=0), values
 
-    def _expectation_step(self, x):
-        pass
+    def _e_step(self, x):
+        """Expectation Step (Calculates responsibilities)
 
-    def _maximisation_step(self, x):
-        pass
+        Args:
+            x (I, D): Input data by features/dimensions
 
-    def _train_step(self):
-        pass
+        Returns:
+            (K, I): Responsibilities
+        """
+        V_sum, V = self(x)
+        return V / V_sum
 
-    def fit(self, x, y, batch_size=1, epochs=1, validation_data=None):
+    def _m_step(self, x, r):
+        """Maximization Step (Updates parameters using responsibilities)
+
+        Args:
+            x (I, D): Input data by features/dimensions
+            r (K, I): Responsibilities
+        """
+        # Update cluster spread
+        r_i = np.sum(r, axis=-1)
+        r_ik = np.sum(r_i)
+        self.lambda_m = r_i / r_ik
+
+        # Make responsibilities able to be broadcasted with input
+        r_expand = np.expand_dims(r, axis=-1)
+
+        # Update mean
+        self.mu_m = np.sum(r_expand * x, axis=1) / np.expand_dims(r_i, axis=-1)
+
+        # Update variance
+        d_scores = x - np.expand_dims(self.mu_m, axis=1)
+        sigma_num = np.zeros_like(self.sigma_m)
+
+        for k in range(self.K):
+            for i in range(self.I):
+                d_score = d_scores[k, i]
+                sigma_num += r_expand[k, i] * d_score.T @ d_score
+
+        self.sigma_m = sigma_num / np.expand_dims(r_i, axis=(-2, -1))
+
+    def _train_step(self, x):
+        ll = self._e_step(x)
+        self._m_step(x, ll)
+
+    def train(self, x, epochs=1):
         self._require_compile()
-        pass
+
+        for ep in range(epochs):
+            for i in trange(0, len(x), desc='epoch %d' % ep):
+                self._train_step(x[i])
+
+        return False
 
     def save(self, path):
         pass

@@ -36,6 +36,7 @@
         "Tensorflow",
         "thresholding",
         "tqdm",
+        "trange",
         "Unet",
         "virtualenv"
     ]
