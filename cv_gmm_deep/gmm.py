@@ -69,7 +69,7 @@ class GMM:
         V_sum, V = self(x)
         return V / V_sum
 
-    def _m_step(self, x, r):
+    def _m_step(self, x, r_ki):
         """Maximization Step (Updates parameters using responsibilities)
 
         Args:
@@ -77,15 +77,15 @@ class GMM:
             r (K, I): Responsibilities
         """
         # Update cluster spread
-        r_i = np.sum(r, axis=-1)
-        r_ik = np.sum(r_i)
-        self.lambda_m = r_i / r_ik
+        r_k = np.sum(r_ki, axis=-1)
+        r = np.sum(r_k)
+        self.lambda_m = r_k / r
 
         # Make responsibilities able to be broadcasted with input
-        r_expand = np.expand_dims(r, axis=-1)
+        r_ki_ = np.expand_dims(r_ki, axis=-1)
 
         # Update mean
-        self.mu_m = np.sum(r_expand * x, axis=1) / np.expand_dims(r_i, axis=-1)
+        self.mu_m = np.sum(r_ki_ * x, axis=1) / np.expand_dims(r_k, axis=-1)
 
         # Update variance
         d_scores = x - np.expand_dims(self.mu_m, axis=1)
@@ -94,9 +94,9 @@ class GMM:
         for k in range(self.K):
             for i in range(self.I):
                 d_score = d_scores[k, i]
-                sigma_num += r_expand[k, i] * d_score.T @ d_score
+                sigma_num += r_ki_[k, i] * d_score.T @ d_score
 
-        self.sigma_m = sigma_num / np.expand_dims(r_i, axis=(-2, -1))
+        self.sigma_m = sigma_num / np.expand_dims(r_k, axis=(-2, -1))
 
     def _train_step(self, x):
         ll = self._e_step(x)
